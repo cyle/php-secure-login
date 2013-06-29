@@ -1,4 +1,4 @@
-# Cyle's PHP Secure Login System
+# CyleSoft PHP Secure Login System
 
 It's pretty simple. Uses BLOWFISH ($2y$, specifically) crypt() hashing in PHP 5.3.7+. The purpose behind this was to make a pretty damn good way to store passwords and give the user a unique session token.
 
@@ -36,3 +36,5 @@ Obviously you'd still want to use SSL to prevent any over-the-wire (or over-the-
 This is just a proof of concept, I don't think you should keep the file structure like this, but you could.
 
 Also, you could easily use memcached or riak or something more efficient to store session data.
+
+Check this out: http://cylesoft.com/
