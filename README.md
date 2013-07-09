@@ -21,8 +21,8 @@ It's pretty simple. Uses BLOWFISH ($2y$, specifically) crypt() hashing in PHP 5.
 1. New user data is stored in MySQL, yay.
 1. User is presented to log in.
 1. When a user logs in, it looks up their email, and compares passwords based on crypt() functionality.
-1. If the user logs in successfully, they are given a 256-bit key (using get_key(256)) that identifies them.
-1. The session key is saved via a cookie, which is set to expire in 30 days by default.
+1. If the user logs in successfully, they are given a 256-bit key and a 256-bit secret (using get_key(256)) that identifies them.
+1. The session key/secret token is saved via a cookie, which is set to expire in 30 days by default.
 1. When the user accesses a page, PHP looks up their session based on this key.
 
 That's it! Obviously you'd probably want to build in a way for a user to invalidate all of their current sessions and change their password.
