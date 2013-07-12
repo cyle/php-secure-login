@@ -68,7 +68,26 @@ if (isset($_COOKIE['test_session']) && trim($_COOKIE['test_session']) != '') { /
 	
 } else if (isset($_POST['e']) && isset($_POST['p'])) { // user is trying to log in?
 	
-	require_once('dbconn_mysql.php');	
+	require_once('dbconn_mysql.php');
+	
+	// login flood control
+	$has_flood_control_limit = false;
+	$attempt_ip_db = "'".$mysqli->escape_string(trim($_SERVER['REMOTE_ADDR']))."'";
+	$check_flood_control = $mysqli->query("SELECT * FROM login_flood_control WHERE ipaddr=$attempt_ip_db");
+	if ($check_flood_control->num_rows > 0) {
+		$has_flood_control_limit = true;
+		$flood_control_info = $check_flood_control->fetch_assoc();
+		if ($flood_control_info['tsc'] < (time() - 1800)) {
+			// it was over half an hour ago -- remove it
+			$delete_flood_control = $mysqli->query('DELETE FROM login_flood_control WHERE id='.$flood_control_info['id']);
+			$has_flood_control_limit = false;
+		} else {
+			$update_flood_control = $mysqli->query('UPDATE login_flood_control SET attempts=attempts+1 WHERE id='.$flood_control_info['id']);
+			if ($flood_control_info['attempts'] > 20) {
+				die('Sorry, you have tried to log in unsuccessfully way too many times. Please try again in a half hour or so.');
+			}
+		}
+	}
 	
 	$users_email_db = "'".$mysqli->escape_string(trim($_POST['e']))."'";
 	
@@ -79,7 +98,15 @@ if (isset($_COOKIE['test_session']) && trim($_COOKIE['test_session']) != '') { /
 		
 		// check password
 		if (crypt(trim($_POST['p']), $current_user_row['pwrdlol']) != $current_user_row['pwrdlol']) {
+			if (!$has_flood_control_limit) {
+				$insert_flood_control = $mysqli->query("INSERT INTO login_flood_control (ipaddr, attempts, tsc) VALUES ($attempt_ip_db, 1, UNIX_TIMESTAMP())");
+			}
 			die('Your password was incorrect, please try again.');
+		} else {
+			// password checked out, clear flood control, if there was any
+			if ($has_flood_control_limit) {
+				$delete_flood_control = $mysqli->query('DELETE FROM login_flood_control WHERE id='.$flood_control_info['id']);
+			}
 		}
 		
 		// ok, cool
@@ -105,6 +132,9 @@ if (isset($_COOKIE['test_session']) && trim($_COOKIE['test_session']) != '') { /
 		header('Location: protected.php');
 		die();
 	} else {
+		if (!$has_flood_control_limit) {
+			$insert_flood_control = $mysqli->query("INSERT INTO login_flood_control (ipaddr, attempts, tsc) VALUES ($attempt_ip_db, 1, UNIX_TIMESTAMP())");
+		}
 		die('Could not find that email address, sorry. Try again, I guess.');
 	}
 				

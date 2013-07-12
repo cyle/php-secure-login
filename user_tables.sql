@@ -14,3 +14,12 @@ CREATE TABLE IF NOT EXISTS `users` (
   `tsc` int(11) NOT NULL,
   PRIMARY KEY (`user_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+
+CREATE TABLE `login_flood_control` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ipaddr` varchar(64) NOT NULL,
+  `attempts` int(11) NOT NULL,
+  `tsc` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ipaddr` (`ipaddr`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;

@@ -33,6 +33,8 @@ Originally this used /dev/random instead of /dev/urandom, but it got way too slo
 
 Obviously you'd still want to use SSL to prevent any over-the-wire (or over-the-air) session hijacking and password stealing.
 
+It also features a login flood control mechanism to prevent bots from trying to brute-force their way in; after 20 failed attempts from a given IP, you need to wait half an hour to try logging in again.
+
 This is just a proof of concept, I don't think you should keep the file structure like this, but you could.
 
 Also, you could easily use memcached or riak or something more efficient to store session data.
